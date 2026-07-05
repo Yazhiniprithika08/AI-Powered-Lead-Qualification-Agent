@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const failCompanyName = document.getElementById('fail-companyName');
     const retryBtn = document.getElementById('btn-retry');
 
-    const BASE_URL = 'http://localhost:8080/api/leads';
+    const BASE_URL = `${CONFIG.API_BASE_URL}/api/leads`;
 
     // Extract ID query param
     const urlParams = new URLSearchParams(window.location.search);

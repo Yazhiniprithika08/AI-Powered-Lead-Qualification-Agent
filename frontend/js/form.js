@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const submitBtn = document.getElementById('btn-submit');
     const resetBtn = document.getElementById('btn-reset');
     
-    const BASE_URL = 'http://localhost:8080/api/leads';
+    const BASE_URL = `${CONFIG.API_BASE_URL}/api/leads`;
 
     // 1. Detect if we are in Edit Mode
     const urlParams = new URLSearchParams(window.location.search);

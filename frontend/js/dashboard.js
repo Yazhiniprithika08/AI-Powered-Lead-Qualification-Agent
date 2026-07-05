@@ -3,8 +3,8 @@
  */
 document.addEventListener('DOMContentLoaded', async () => {
     // API Endpoints
-    const DASHBOARD_URL = 'http://localhost:8080/api/dashboard';
-    const LEADS_URL = 'http://localhost:8080/api/leads';
+    const DASHBOARD_URL = `${CONFIG.API_BASE_URL}/api/dashboard`;
+    const LEADS_URL = `${CONFIG.API_BASE_URL}/api/leads`;
 
     // State Variables
     let allLeads = [];

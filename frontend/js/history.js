@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteCancel = document.getElementById('delete-cancel');
     const deleteConfirm = document.getElementById('delete-confirm');
 
-    const BASE_URL = 'http://localhost:8080/api/leads';
+    const BASE_URL = `${CONFIG.API_BASE_URL}/api/leads`;
     let currentLeads = [];
     let deleteTargetId = null;
 
