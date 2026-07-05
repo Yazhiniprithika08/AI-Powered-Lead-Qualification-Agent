@@ -1,0 +1,20 @@
+# Maven Build Output
+backend/target/
+target/
+
+# IDEs and Editors
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.env
+.env.local
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+*.log

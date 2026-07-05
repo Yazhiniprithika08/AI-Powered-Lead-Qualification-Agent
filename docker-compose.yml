@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # MongoDB Database Service
+  mongodb:
+    image: mongo:latest
+    container_name: lead-qualifier-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - lead-qualifier-network
+
+  # Spring Boot Backend REST API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lead-qualifier-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/lead_db
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - mongodb
+    networks:
+      - lead-qualifier-network
+
+  # Nginx Frontend Static File Web Server Service
+  frontend:
+    image: nginx:alpine
+    container_name: lead-qualifier-frontend
+    ports:
+      - "8000:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    networks:
+      - lead-qualifier-network
+
+volumes:
+  mongo-data:
+
+networks:
+  lead-qualifier-network:
+    driver: bridge
