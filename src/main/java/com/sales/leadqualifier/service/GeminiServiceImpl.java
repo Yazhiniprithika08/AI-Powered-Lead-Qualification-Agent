@@ -23,7 +23,7 @@ public class GeminiServiceImpl implements GeminiService {
     private static final Logger logger = LoggerFactory.getLogger(GeminiServiceImpl.class);
 
     private static final String GEMINI_API_URL = 
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=";
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
