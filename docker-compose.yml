@@ -15,7 +15,7 @@ services:
   # Spring Boot Backend REST API Service
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     container_name: lead-qualifier-backend
     ports:

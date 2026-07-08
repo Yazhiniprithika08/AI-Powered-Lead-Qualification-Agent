@@ -61,23 +61,22 @@ The **Lead Qualification Agent** automates B2B lead triage. By utilizing **Googl
 ```
 LeadQualificationAgent/
 │
-├── backend/
-│   ├── Dockerfile
-│   ├── pom.xml
-│   └── src/
-│       └── main/
-│           ├── java/com/sales/leadqualifier/
-│           │   ├── LeadQualificationAgentApplication.java
-│           │   ├── config/             # CorsConfig, GeminiConfig
-│           │   ├── controller/         # LeadController, DashboardController
-│           │   ├── dto/                # DTO models (Request, Response, Dashboard Summary)
-│           │   ├── exception/          # Global exception handlers
-│           │   ├── model/              # Lead Document Entity
-│           │   ├── repository/         # LeadRepository interface
-│           │   ├── service/            # GeminiService, LeadQualificationService, DashboardService
-│           │   └── util/               # Validation helpers
-│           └── resources/
-│               └── application.properties
+├── Dockerfile                          # Docker deployment descriptor
+├── pom.xml                             # Maven build descriptor
+├── src/                                # Spring Boot Source code
+│   └── main/
+│       ├── java/com/sales/leadqualifier/
+│       │   ├── LeadQualificationAgentApplication.java
+│       │   ├── config/             # CorsConfig, GeminiConfig
+│       │   ├── controller/         # LeadController, DashboardController
+│       │   ├── dto/                # DTO models (Request, Response, Dashboard Summary)
+│       │   ├── exception/          # Global exception handlers
+│       │   ├── model/              # Lead Document Entity
+│       │   ├── repository/         # LeadRepository interface
+│       │   ├── service/            # GeminiService, LeadQualificationService, DashboardService
+│       │   └── util/               # Validation helpers
+│       └── resources/
+│           └── application.properties
 │
 ├── frontend/
 │   ├── index.html                      # Homepage Hero
@@ -174,14 +173,13 @@ Data is saved in the `leads` collection under the following document schema:
 - Local MongoDB running on `mongodb://localhost:27017`
 
 ### Steps
-1. Navigate to the backend directory and launch the Spring Boot service:
+1. Launch the Spring Boot service from the root:
    ```bash
-   cd backend
    mvn spring-boot:run
    ```
 2. Run a local static file server inside the frontend folder:
    ```bash
-   cd ../frontend
+   cd frontend
    # Using Python:
    python -m http.server 8000
    # Or using Node:

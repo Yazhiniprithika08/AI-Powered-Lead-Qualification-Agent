@@ -1,0 +1,13 @@
+# Ignore frontend files
+frontend/
+
+# Ignore local build output
+target/
+backend/target/
+
+# Ignore IDE and settings
+.idea/
+.vscode/
+.git/
+.gitignore
+*.md
