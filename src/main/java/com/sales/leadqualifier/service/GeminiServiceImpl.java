@@ -22,8 +22,8 @@ public class GeminiServiceImpl implements GeminiService {
 
     private static final Logger logger = LoggerFactory.getLogger(GeminiServiceImpl.class);
 
-    private static final String GEMINI_API_URL = 
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
+    private static final String GEMINI_API_BASE_URL = 
+            "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=";
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -54,34 +54,43 @@ public class GeminiServiceImpl implements GeminiService {
         GeminiRequestDTO requestDto = new GeminiRequestDTO(prompt);
 
         try {
-            // 3. POST request to Gemini endpoint
-            String targetUrl = GEMINI_API_URL + apiKey.trim();
-            GeminiResponseDTO responseDto = restTemplate.postForObject(targetUrl, requestDto, GeminiResponseDTO.class);
-
-            if (responseDto == null || responseDto.getCandidates() == null || responseDto.getCandidates().isEmpty()) {
-                throw new RuntimeException("Empty response received from Gemini API.");
-            }
-
-            // 4. Extract Text response content
-            String rawJsonText = responseDto.getCandidates().get(0).getContent().getParts().get(0).getText();
-            logger.debug("Raw Gemini Text response: {}", rawJsonText);
-
-            // Sanitize raw text to strip out markdown JSON fence blocks if present
-            String sanitizedJson = sanitizeJsonText(rawJsonText);
-            logger.debug("Sanitized JSON payload: {}", sanitizedJson);
-
-            // 5. Parse JSON string into DTO using Jackson ObjectMapper
-            GeminiAnalysisResultDTO result = objectMapper.readValue(sanitizedJson, GeminiAnalysisResultDTO.class);
-            
-            logger.info("Successfully parsed Gemini response. Score: {}, Category: {}", 
-                        result.getLeadScore(), result.getCategory());
-            
-            return result;
-
+            // Try primary model: gemini-3.5-flash
+            return callGeminiModel("gemini-3.5-flash", requestDto);
         } catch (Exception ex) {
-            logger.error("Error occurred during Google Gemini API call / parsing:", ex);
-            throw new RuntimeException("Gemini AI API processing failure: " + ex.getMessage(), ex);
+            logger.warn("Primary model gemini-3.5-flash failed or experienced high demand. Trying fallback model gemini-3.1-flash-lite. Reason: {}", ex.getMessage());
+            try {
+                // Try fallback model: gemini-3.1-flash-lite (high capacity, low latency)
+                return callGeminiModel("gemini-3.1-flash-lite", requestDto);
+            } catch (Exception fallbackEx) {
+                logger.error("Fallback model gemini-3.1-flash-lite also failed:", fallbackEx);
+                throw new RuntimeException("Gemini AI API processing failure: " + fallbackEx.getMessage(), fallbackEx);
+            }
         }
+    }
+
+    /**
+     * Executes the REST POST request to the Google Gemini API for a specific model.
+     */
+    private GeminiAnalysisResultDTO callGeminiModel(String modelName, GeminiRequestDTO requestDto) throws Exception {
+        String targetUrl = String.format(GEMINI_API_BASE_URL, modelName) + apiKey.trim();
+        logger.info("Executing Gemini call using model: {}", modelName);
+        
+        GeminiResponseDTO responseDto = restTemplate.postForObject(targetUrl, requestDto, GeminiResponseDTO.class);
+
+        if (responseDto == null || responseDto.getCandidates() == null || responseDto.getCandidates().isEmpty()) {
+            throw new RuntimeException("Empty response received from Gemini model " + modelName);
+        }
+
+        // Extract Text response content
+        String rawJsonText = responseDto.getCandidates().get(0).getContent().getParts().get(0).getText();
+        logger.debug("Raw Gemini Text response from {}: {}", modelName, rawJsonText);
+
+        // Sanitize raw text to strip out markdown JSON fence blocks if present
+        String sanitizedJson = sanitizeJsonText(rawJsonText);
+        logger.debug("Sanitized JSON payload from {}: {}", modelName, sanitizedJson);
+
+        // Parse JSON string into DTO using Jackson ObjectMapper
+        return objectMapper.readValue(sanitizedJson, GeminiAnalysisResultDTO.class);
     }
 
     /**

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View Google Gemini B2B lead qualification score, category status, reasoning details, and action recommendations.">
+    <title>AI Analysis Result - AI-Powered Lead Qualification Agent</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        /* Specific Result Page Styling */
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+        .result-header-box {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+        .result-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2.5rem;
+            width: 100%;
+            align-items: start;
+        }
+        /* Radial Gauge / Score Display */
+        .score-panel {
+            background: rgba(10, 14, 23, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            text-align: center;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        }
+        .score-ring {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 8px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s ease;
+        }
+        .score-ring.hot {
+            border-color: rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 40px rgba(16, 185, 129, 0.25);
+        }
+        .score-ring.warm {
+            border-color: rgba(245, 158, 11, 0.2);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.25);
+        }
+        .score-ring.cold {
+            border-color: rgba(239, 68, 68, 0.2);
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.25);
+        }
+        .score-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--text-primary);
+        }
+        .score-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .category-pill {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .category-pill.hot {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+        .category-pill.warm {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        .category-pill.cold {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+        /* Detail Section */
+        .analysis-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .result-card-section {
+            background: rgba(10, 14, 23, 0.4);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .result-card-section.recommendation-panel {
+            background: rgba(99, 102, 241, 0.04);
+            border-color: rgba(99, 102, 241, 0.25);
+            position: relative;
+        }
+        .result-card-section.recommendation-panel::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+        }
+        .result-card-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .result-card-value {
+            font-size: 1.05rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        /* Grid for demographic info */
+        .info-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            font-size: 0.9rem;
+        }
+        .info-strip-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .info-strip-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .info-strip-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        /* Failed Analysis Panel */
+        .failed-panel {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background: rgba(239, 68, 68, 0.03);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            width: 100%;
+        }
+        .failed-icon {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 50%;
+            padding: 1.5rem;
+            display: inline-flex;
+            margin-bottom: 0.5rem;
+        }
+        @media (max-width: 768px) {
+            .result-layout {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .info-strip {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Application Header -->
+        <header>
+            <div class="logo-container">
+                <a href="./index.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+                    <img src="./assets/logo.png" alt="Lead Qualification Agent Logo" class="logo-img">
+                    <span class="brand-name">LeadQualifier AI</span>
+                </a>
+            </div>
+            <nav style="display: flex; gap: 20px;">
+                <a href="./index.html" class="nav-link">Home</a>
+                <a href="./dashboard.html" class="nav-link">Dashboard</a>
+                <a href="./lead-form.html" class="nav-link">New Lead</a>
+                <a href="./history.html" class="nav-link">History</a>
+            </nav>
+        </header>
+
+        <!-- Result Workspace -->
+        <main>
+            <div class="form-card" style="max-width: 950px;">
+                <!-- Result Success State Container -->
+                <div id="success-container" class="result-container" style="display: none;">
+                    <div class="result-header-box">
+                        <h2 class="form-title" style="margin-bottom: 0.25rem;">AI Qualification Report</h2>
+                        <p class="form-subtitle">Google Gemini B2B firmographic qualification results.</p>
+                    </div>
+
+                    <div class="result-layout">
+                        <!-- Score Display Gauge -->
+                        <div class="score-panel">
+                            <div class="score-ring" id="score-ring-element">
+                                <span class="score-number" id="res-score">-</span>
+                                <span class="score-label">Score</span>
+                            </div>
+                            <div class="category-pill" id="res-category">-</div>
+                            <div class="score-label" style="margin-top: -8px;">Category</div>
+                        </div>
+
+                        <!-- Analysis details -->
+                        <div class="analysis-details">
+                            <!-- Lead strip details -->
+                            <div class="info-strip">
+                                <div class="info-strip-item">
+                                    <span class="info-strip-label">Lead Name</span>
+                                    <span class="info-strip-value" id="res-leadName">-</span>
+                                </div>
+                                <div class="info-strip-item">
+                                    <span class="info-strip-label">Company Name</span>
+                                    <span class="info-strip-value" id="res-companyName">-</span>
+                                </div>
+                                <div class="info-strip-item">
+                                    <span class="info-strip-label">Job Role</span>
+                                    <span class="info-strip-value" id="res-jobRole">-</span>
+                                </div>
+                            </div>
+
+                            <!-- Reason Card -->
+                            <div class="result-card-section">
+                                <span class="result-card-label">AI Analysis Logic / Reason</span>
+                                <p class="result-card-value" id="res-reason">-</p>
+                            </div>
+
+                            <!-- Recommendation Card -->
+                            <div class="result-card-section recommendation-panel">
+                                <span class="result-card-label" style="color: var(--accent-purple);">Sales Call to Action</span>
+                                <p class="result-card-value" id="res-recommendation" style="font-weight: 500;">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Action Buttons -->
+                    <div class="form-actions" style="width: 100%; margin-top: 1rem;">
+                        <a href="./lead-form.html" class="btn btn-secondary" style="padding: 0.8rem 1.8rem;">Add Another Lead</a>
+                        <a href="./history.html" class="btn btn-primary" style="padding: 0.8rem 1.8rem;">
+                            View Lead History
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Result FAILED State Container -->
+                <div id="failed-container" class="failed-panel" style="display: none;">
+                    <div class="failed-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary);">AI Qualification Failed</h3>
+                        <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto; line-height: 1.6;">
+                            Lead data was saved in MongoDB, but Google Gemini AI analysis encountered an issue (e.g. invalid API key, network failure, or API timeout).
+                        </p>
+                    </div>
+
+                    <div class="info-strip" style="width: 100%; max-width: 600px; text-align: left;">
+                        <div class="info-strip-item">
+                            <span class="info-strip-label">Lead Name</span>
+                            <span class="info-strip-value" id="fail-leadName">-</span>
+                        </div>
+                        <div class="info-strip-item">
+                            <span class="info-strip-label">Company Name</span>
+                            <span class="info-strip-value" id="fail-companyName">-</span>
+                        </div>
+                        <div class="info-strip-item">
+                            <span class="info-strip-label">Analysis Status</span>
+                            <span class="info-strip-value" style="color: var(--danger);">FAILED</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <a href="./history.html" class="btn btn-secondary" style="padding: 0.8rem 1.8rem;">View Lead History</a>
+                        <button type="button" class="btn btn-primary" id="btn-retry" style="padding: 0.8rem 1.8rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                            Retry Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            &copy; 2026 LeadQualifier AI. All rights reserved. Phase 3 Gemini AI Evaluation.
+        </footer>
+    </div>
+
+    <!-- Toast Notification for feedback -->
+    <div id="toast" class="toast">
+        <div id="toast-message" class="toast-message"></div>
+    </div>
+
+    <!-- Loading Animation Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner-box">
+            <div class="spinner-outer"></div>
+            <div class="spinner-inner"></div>
+        </div>
+        <div class="loading-text">Retrieving AI Qualification Details...</div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/config.js"></script>
+    <script src="./js/result.js"></script>
+</body>
+</html>

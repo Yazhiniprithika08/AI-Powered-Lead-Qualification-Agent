@@ -64,5 +64,19 @@ public interface LeadQualificationService {
      * @param id MongoDB identifier
      * @return updated lead response containing AI results
      */
+    /**
+     * Retry Google Gemini B2B evaluation on an existing lead record.
+     * Updates the same MongoDB document without duplicates.
+     *
+     * @param id MongoDB identifier
+     * @return updated lead response containing AI results
+     */
     LeadResponseDTO retryAnalysis(String id);
+
+    /**
+     * Test the connection to the Google Gemini API with a mock lead.
+     *
+     * @return Gemini analysis result for verification
+     */
+    com.sales.leadqualifier.dto.GeminiAnalysisResultDTO testGeminiConnection();
 }

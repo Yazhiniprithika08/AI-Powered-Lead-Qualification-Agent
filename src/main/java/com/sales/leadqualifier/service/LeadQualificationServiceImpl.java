@@ -197,6 +197,24 @@ public class LeadQualificationServiceImpl implements LeadQualificationService {
         return convertToResponseDTO(finalLead);
     }
 
+    @Override
+    public com.sales.leadqualifier.dto.GeminiAnalysisResultDTO testGeminiConnection() {
+        logger.info("Executing diagnostic test of Google Gemini API connection");
+        Lead testLead = new Lead();
+        testLead.setLeadName("Test User");
+        testLead.setCompanyName("Test Corp");
+        testLead.setIndustry("Technology");
+        testLead.setJobRole("CEO");
+        testLead.setCompanySize(1500);
+        testLead.setAnnualRevenue(50000000.0);
+        testLead.setBudget(500000.0);
+        testLead.setTimeline("Immediate");
+        testLead.setRequirement("Enterprise cloud migration services");
+        testLead.setEmail("test@testcorp.com");
+        testLead.setPhoneNumber("1234567890");
+        return geminiService.analyzeLead(testLead);
+    }
+
     /**
      * Helper to map Lead entity to LeadResponseDTO.
      */

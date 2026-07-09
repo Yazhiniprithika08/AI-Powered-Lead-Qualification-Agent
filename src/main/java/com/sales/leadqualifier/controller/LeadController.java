@@ -146,4 +146,28 @@ public class LeadController {
         LeadResponseDTO lead = leadQualificationService.retryAnalysis(id);
         return ResponseEntity.ok(lead);
     }
+
+    /**
+     * Diagnostic endpoint to test Google Gemini API connectivity.
+     *
+     * @return test connectivity status report
+     */
+    @GetMapping("/test-gemini")
+    public ResponseEntity<Map<String, Object>> testGemini() {
+        logger.info("REST request to run diagnostic test of Gemini API connection");
+        Map<String, Object> response = new HashMap<>();
+        try {
+            com.sales.leadqualifier.dto.GeminiAnalysisResultDTO result = leadQualificationService.testGeminiConnection();
+            response.put("status", "success");
+            response.put("message", "Google Gemini API connection verified successfully!");
+            response.put("modelUsed", "gemini-3.5-flash");
+            response.put("testResult", result);
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            logger.error("Diagnostic test of Gemini API connection failed:", ex);
+            response.put("status", "error");
+            response.put("message", "Gemini API test failed: " + ex.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
 }
